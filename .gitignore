@@ -1,0 +1,7 @@
+.env
+/build
+/.gradle
+/.idea
+/gradle
+/backup
+/schedule_logs
