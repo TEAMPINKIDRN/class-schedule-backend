@@ -76,11 +76,18 @@
         state: present  
         createhome: yes 
 
+    - name: Create db
+      postgresql_db:
+        state: present
+        name: "{{ db_name }}"
+      become: true
+      become_user: "{{ postgres_user }}"
+
     - name: Restore the database
       postgresql_db:
         state: restore
         name: "{{ db_name }}"
-        target: "/var/lib/{{ app_name }}/backups/uploads/{{ backup_file }}.dump.gz"
+        target: "/var/lib/{{ app_name }}/backups/uploads/{{ backup_file }}"
       become: yes
       become_user: "{{ postgres_user }}"
 
