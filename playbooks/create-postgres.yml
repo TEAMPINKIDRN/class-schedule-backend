@@ -3,9 +3,6 @@
   become: yes
   gather_facts: False
   vars:
-    postgres_root_user: root
-    postgres_root_pass: pass
-    allow_world_readable_tmpfiles: true
   tasks:
     - name: Update apt repo and cache on all Ubuntu boxes
       apt:
@@ -71,14 +68,15 @@
         role_attr_flags: CREATEDB,SUPERUSER,CREATEROLE
         encrypted: yes
         state: present
-     - name: Create user
+
+    - name: Create user
       user:
-        name: {{ postgres_user }} 
+        name: "{{ postgres_user }}"
         password: "{{ 'password' | password_hash('sha512') }}"  
         state: present  
         createhome: yes 
 
-     - name: "Restore the database"
+    - name: Restore the database
       postgresql_db:
         state: restore
         name: "{{ db_name }}"
