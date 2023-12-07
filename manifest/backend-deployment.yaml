@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  selector:
+    matchLabels:
+      app: schedule
+      tier: backend
+      track: stable
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: schedule
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - name: schedule
+          image: bobrja/pink-team:1
+          ports:
+            - name: port-backend
+              containerPort: 8080
+          env:
+            - name: JWT_SECRET
+              value: jwttoken
+            - name: JWT_EXPIRED
+              value: "86400000"
+            - name: DB_NAME
+              value: schedule
+            - name: DB_HOST
+              value: "10.36.5.39"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USERNAME
+              value: postgres
+            - name: DB_PASSWORD
+              value: 9h4m03JQURp7
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+            - name: MONGO_DATABASE
+              value: schedule_mongo
+            - name: MONGO_SERVER
+              value: mongo
+            - name: SMTP_HOST
+              value: 9h4m03JQURp7
+            - name: SMTP_USERNAME
+              value: 9h4m03JQURp7
+            - name: SMTP_PASSWORD
+              value: 9h4m03JQURp7  # Corrected typo in the variable name

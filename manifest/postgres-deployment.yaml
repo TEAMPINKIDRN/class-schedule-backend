@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: schedule
+      tier: postgres
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: schedule
+        tier: postgres
+        track: stable
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:14.0
+        ports:
+          - containerPort: 5432
+        envFrom:
+          - secretRef:
+              name: postgres
+          - configMapRef:
+              name: postgres  
+        volumeMounts:
+        - name: postgres-database-storage
+          mountPath: /var/lib/pgsql/data
+      volumes:
+      - name: postgres-database-storage
+        persistentVolumeClaim:
+          claimName: postgres-pv-claim
