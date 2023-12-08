@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: connect
+spec:
+  selector:
+    matchLabels:
+      app: schedule
+      tier: backend
+      env: dev
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: schedule
+        tier: backend
+        env: dev
+    spec:
+      containers:
+      - name: schedule-back
+        image: mneteli/pink:first
+        ports:
+          - name: backend-port
+            containerPort: 8080
+        env:
+            - name: JWT_SECRET
+              value: jwttoken
+            - name: JWT_EXPIRED
+              value: "86400000"
+              
+            - name: DB_NAME
+              value: schedule
+            - name: DB_HOST
+              value: "10.36.5.39"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USERNAME
+              value: postgres
+            - name: DB_PASSWORD
+              value: 9h4m03JQURp7
+              
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+              
+            - name: MONGO_DATABASE
+              value: schedule_mongo
+            - name: MONGO_SERVER
+              value: mongo
+              
+            - name: SMTP_HOST
+              value: 9h4m03JQURp7
+            - name: SMTP_USERNAME
+              value: 9h4m03JQURp7
+            - name: SMTP_PASSWORD
+              value: 9h4m03JQURp7
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: connect
+spec:
+  selector:
+    app: schedule
+    tier: backend
+    env: dev
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+...
