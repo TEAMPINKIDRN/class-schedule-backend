@@ -18,10 +18,9 @@ spec:
         track: stable
     spec:
       containers:
-        - name: nginx
-          image: bobrja/mynginx:2
-          lifecycle:
-            preStop:
-              exec:
-                command: ["/usr/sbin/nginx","-s","quit"] 
-...
+        - name: schedule-front
+          imagePullPolicy: Always
+          image: bobrja/frontend:1
+          ports:
+            - name: nginx-port 
+              containerPort: 80
