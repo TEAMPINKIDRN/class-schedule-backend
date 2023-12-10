@@ -1,39 +1,20 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: schedule-network
-  namespace: default
+  name: allow-from-frontend
+  namespace: connect
 spec:
   podSelector:
     matchLabels:
-      app: schedule
-      tier: postgres
-      track: stable
-  policyTypes:
-    - Ingress
-    - Egress
+        app: schedule-frontend
+        tier: backend
+        env: dev
   ingress:
-    - from:
-        - ipBlock:
-            cidr: 10.36.0.0/16
-        - namespaceSelector:
-            matchLabels:
-              app: schedule
-              tier: postgres
-              track: stable
-        - podSelector:
-            matchLabels:
-              app: schedule
-              tier: postgres
-              track: stable
-      ports:
-        - protocol: TCP
-          port: 6379
-  egress:
-    - to:
-        - ipBlock:
-            cidr: 10.0.0.0/24
-      ports:
-        - protocol: TCP
-          port: 5978
+  - from:
+    - podSelector:
+        matchLabels:
+          app: schedule-frontend
+          tier: frontend
+          env: dev
+
 

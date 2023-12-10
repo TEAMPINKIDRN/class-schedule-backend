@@ -7,14 +7,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: schedule
+      app: schedule-backend
       tier: backend
       env: dev
   replicas: 1
   template:
     metadata:
       labels:
-        app: schedule
+        app: schedule-backend
         tier: backend
         env: dev
     spec:
@@ -23,23 +23,42 @@ spec:
         image: mneteli/pink:first
         ports:
           - name: backend-port
-            containerPort: 8080
+            containerPort: 8080         
         env:
             - name: JWT_SECRET
               value: jwttoken
             - name: JWT_EXPIRED
               value: "86400000"
               
-            - name: DB_NAME
-              value: schedule
             - name: DB_HOST
-              value: "10.36.5.39"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: DB_HOST
+                  
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: DB_NAME
+                  
             - name: DB_PORT
-              value: "5432"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: DB_PORT      
+                        
             - name: DB_USERNAME
-              value: postgres
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: DB_USERNAME
+                  
             - name: DB_PASSWORD
-              value: 9h4m03JQURp7
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: DB_PASSWORD
               
             - name: REDIS_HOST
               value: redis
@@ -66,11 +85,12 @@ metadata:
   namespace: connect
 spec:
   selector:
-    app: schedule
+    app: schedule-backend
     tier: backend
     env: dev
   ports:
   - protocol: TCP
     port: 8080
     targetPort: 8080
+  type: LoadBalancer
 ...

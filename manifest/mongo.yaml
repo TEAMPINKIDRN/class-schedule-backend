@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: schedule
+      tier: mongo
+      env: dev
+  template:
+    metadata:
+      labels:
+        app: schedule
+        tier: mongo
+        env: dev
+    spec:
+      containers:
+      - name: mongo
+        image: "mongo:jammy"
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: user
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  selector:
+    app: schedule
+    tier: mongo
+    env: dev
+  ports:
+  - port: 27017
+    protocol: TCP
+    targetPort: 27017
