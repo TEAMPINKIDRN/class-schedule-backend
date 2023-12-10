@@ -1,0 +1,116 @@
+---
+- name: Install Nexus
+  hosts: azure_vm
+  become: yes
+
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+    - name: Install OpenJDK 8
+      apt:
+        name: openjdk-8-jre-headless
+        state: present
+    - name: Download Nexus
+      get_url:
+        url: https://download.sonatype.com/nexus/3/nexus-3.63.0-01-unix.tar.gz 
+        dest: /opt/latest-unix.tar.gz
+    - name: Extract Nexus
+      ansible.builtin.unarchive:
+        src: /opt/latest-unix.tar.gz
+        dest: /opt/
+        remote_src: yes
+
+    - name: Rename Nexus directory if it doesn't exist
+      ansible.builtin.command:
+        cmd: mv /opt/nexus-3.63.0-01 /opt/nexus
+        creates: /opt/nexus
+      ignore_errors: yes
+
+    - name: Allow Nexus user to run commands without a password
+      lineinfile:
+        path: /etc/sudoers
+        line: 'nexus ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+    - name: Create Nexus user
+      ansible.builtin.user:
+        name: nexus
+        shell: /bin/bash
+        system: yes
+    - name: Set ownership for Nexus directories
+      ansible.builtin.file:
+        path: "/opt/nexus"
+        state: directory
+        owner: nexus
+        group: nexus
+
+    - name: Set ownership for Nexus directories
+      ansible.builtin.file:
+        path: "/opt/sonatype-work"
+        state: directory
+        owner: nexus
+        group: nexus
+
+
+    - name: Configure Nexus run_as_user
+      lineinfile:
+        path: /opt/nexus/bin/nexus.rc
+        line: "run_as_user=\"nexus\""
+        
+    - name: Remove existing nexus.vmoptions file
+      ansible.builtin.file:
+        path: /opt/nexus/bin/nexus.vmoptions
+        state: absent
+
+    - name: Create new nexus.vmoptions file with custom values
+      ansible.builtin.copy:
+        content: |
+          -Xms1024m
+          -Xmx1024m
+          -XX:MaxDirectMemorySize=1024m
+          -XX:LogFile=./sonatype-work/nexus3/log/jvm.log
+          -XX:-OmitStackTraceInFastThrow
+          -Djava.net.preferIPv4Stack=true
+          -Dkaraf.home=.
+          -Dkaraf.base=.
+          -Dkaraf.etc=etc/karaf
+          -Djava.util.logging.config.file=/etc/karaf/java.util.logging.properties
+          -Dkaraf.data=./sonatype-work/nexus3
+          -Dkaraf.log=./sonatype-work/nexus3/log
+          -Djava.io.tmpdir=./sonatype-work/nexus3/tmp
+          -Djava.endorsed.dirs=lib/endorsed
+
+        dest: /opt/nexus/bin/nexus.vmoptions
+        owner: nexus
+        group: nexus
+        mode: 0644
+    - name: Remove existing nexus.service file
+      ansible.builtin.file:
+        path: /etc/systemd/system/nexus.service
+        state: absent
+
+    - name: Create new nexus.service file with custom content
+      ansible.builtin.copy:
+        content: |
+         [Unit]
+         Description=nexus service
+         After=network.target   
+         [Service]
+         Type=forking
+         LimitNOFILE=65536
+         TasksMax=9456
+         ExecStart=/opt/nexus/bin/nexus start
+         ExecStop=/opt/nexus/bin/nexus stop
+         User=nexus
+         Restart=on-abort
+         [Install]
+         WantedBy=multi-user.target
+        dest: /etc/systemd/system/nexus.service
+        owner: root
+        group: root
+        mode: 0644
+    - name: Start Nexus service
+      systemd:
+        name: nexus
+        state: started
+
