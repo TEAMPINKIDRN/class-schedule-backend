@@ -1,0 +1,18 @@
+replicaCount: 2
+image: bobrja/pink-team:1
+name : schedule
+imagePullPolicy: Always
+secretRef: backend-secret
+configMapRef: backend-configmap
+
+deployment:
+  containerPort: 8080
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  protocol: TCP
+
+
+
