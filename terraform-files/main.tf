@@ -1,6 +1,6 @@
         
 module "gcp-clusters" {
-    source                        = "./modules/gcp-clusters"
+    source                        = "git::git@github.com:IaKoval/terraform-modules.git//modules/gcp-clusters"
     env                           = "prod"
     region                        = "us-central1"
     #kubernetes
@@ -28,7 +28,7 @@ module "gcp-clusters" {
 }
 
 module "gcp-clusters-stage" {
-    source                        = "./modules/gcp-clusters"
+    source                        = "git::git@github.com:IaKoval/terraform-modules.git//modules/gcp-clusters"
     env                           = "stage"
     region                        = "us-east4"
     #kubernetes
