@@ -1,14 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}
+  name: redis-service
 spec:
   selector:
-    app: {{ .Values.name }}
+    app: redis
     tier: {{ .Release.Name }}
   ports:
   - protocol: {{ .Values.service.protocol }}
-    port: {{ .Values.service.port }}
-    targetPort: {{ .Values.service.targetPort }}
+    port: 6379
+    targetPort: 6379
   type: {{ .Values.service.type }}
-  

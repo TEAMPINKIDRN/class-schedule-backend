@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+      tier: {{ .Release.Name }}
+      track: stable
+  replicas: {{ .Values.replicaCount }}
+  template:
+    spec:
+      containers:
+      - name: redis
+        image: redis:latest
+    metadata:
+      labels:
+        app: redis
+        tier: {{ .Release.Name }}
+        track: stable
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
