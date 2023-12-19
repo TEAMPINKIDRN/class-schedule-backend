@@ -1,0 +1,19 @@
+global:
+  enabled: true
+  name: consul
+  image: hashicorp/consul:1.17.0
+  datacenter: gke
+  tls:
+    enabled: true
+  acls:
+    manageSystemACLs: true
+server:
+  enabled: true
+  replicas: 3
+ui:
+  enabled: true
+  service:
+    type: LoadBalancer
+connectInject:
+  enabled: true
+
