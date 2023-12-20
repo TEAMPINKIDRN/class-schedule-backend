@@ -15,6 +15,8 @@ spec:
         app: {{ .Values.name }}
         tier: {{ .Release.Name }}
         track: stable
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
     spec:
       containers:
         - name: {{ .Values.name }}
@@ -25,6 +27,5 @@ spec:
               containerPort: {{ .Values.deployment.containerPort }}
           envFrom:
             - secretRef:
-              name: {{ .Release.Name }}-backend-secret
-            - configMapRef:
-                name: {{ .Release.Name }}-backend-configmap
+                name: class-schedule-secrets
+          

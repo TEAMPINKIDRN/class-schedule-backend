@@ -9,10 +9,24 @@ deployment:
   containerPort: 8080
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   port: 8080
   targetPort: 8080
   protocol: TCP
 
+# vault-configuration
+vault:
+  server: "http://vault-0.vault-internal:8200"
+  vaultServiceAccount:
+    name: vault-auth-schedule
 
+# secret-store
+secretStore:
+  name: secret-store-pink
+
+# external-secrets
+externalSecrets:
+  name: external-secret-pink
+  targetName: class-schedule-secrets
+  refreshTime: 15s
 
