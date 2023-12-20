@@ -8,7 +8,8 @@ pipeline {
         nexus_url = "nexus-registry.hrtov.xyz"
         image_name = "nexus-registry.hrtov.xyz/prod/back"
         nexus_user = credentials('nexus_user')
-        repo_url = "https://nexus-registry.hrtov.xyz/service/rest/repository/browse/schedule/v2/prod/back/tags/"  
+        repo_url = "https://nexus-registry.hrtov.xyz/service/rest/repository/browse/schedule/v2/prod/back/tags/" 
+        discord_webhook=credentials("discord_webhook")
       }
       
     stages {
@@ -94,6 +95,14 @@ pipeline {
             sh 'docker stop schedule_postgres  schedule_mongo  schedule_redis  tomcat_run'
             sh 'docker container prune -f'
             sh 'docker network prune -f'  
+        }
+        success {
+            discordSend description: "Jenkins Pipeline Build", footer: "BUILD SUCCESS", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "${discord_webhook}"
+           
+        }
+        failure {
+            discordSend description: "Jenkins Pipeline Build", footer: "BUILD FAILURE", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "${discord_webhook}"
+           
         }
     }
 }
