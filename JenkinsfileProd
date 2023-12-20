@@ -92,7 +92,6 @@ pipeline {
      post {
         always {
             sh 'docker stop schedule_postgres  schedule_mongo  schedule_redis  tomcat_run'
-            sh 'docker network prune -f'
             sh 'docker container prune -f'
             sh 'docker network prune -f'  
         }
