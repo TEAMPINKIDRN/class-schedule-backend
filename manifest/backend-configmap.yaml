@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: backend-configmap
 data:
-  DB_HOST: postgres.default.svc.cluster.local
+  DB_HOST: 10.138.0.4
   DB_PORT: "5432"
   REDIS_HOST: redis.default.svc.cluster.local
   REDIS_PORT: "6379"

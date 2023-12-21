@@ -20,7 +20,7 @@ spec:
       containers:
         - name: schedule-front
           imagePullPolicy: Always
-          image: bobrja/frontend:1
+          image: bobrja/frontend:3
           ports:
             - name: nginx-port 
               containerPort: 80

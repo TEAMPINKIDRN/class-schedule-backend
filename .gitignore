@@ -5,3 +5,5 @@
 /gradle
 /backup
 /schedule_logs
+/manifest/backend-secret.yaml
+/manifest/postgres-secret.yaml
