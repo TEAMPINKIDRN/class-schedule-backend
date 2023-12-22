@@ -1,0 +1,108 @@
+pipeline {
+    agent any
+    environment{
+        envfile = credentials('env')
+        db_cred = credentials('postgres_user')
+        github_branch = "main"
+        github_url = "https://github.com/TEAMPINKIDRN/class-schedule-backend.git"
+        nexus_url = "nexus-registry.hrtov.xyz"
+        image_name = "nexus-registry.hrtov.xyz/prod/back"
+        nexus_user = credentials('nexus_user')
+        repo_url = "https://nexus-registry.hrtov.xyz/service/rest/repository/browse/schedule/v2/prod/back/tags/" 
+        discord_webhook=credentials("discord_webhook")
+      }
+      
+    stages {
+        stage('Fetch code') {
+            steps {
+               git branch: "${github_branch}", url: "${github_url}"
+               }
+        }
+      	stage('Create new network'){
+            steps {
+	      script {
+		def networkName = "schedule_network"
+		
+		sh "docker network create ${networkName}"    
+              }
+  	   }
+	}
+        stage('Start Mongo, Redic, Postgres') {
+            steps {
+                parallel(
+                    mongo: {
+                       script {
+		          def containerName = "schedule_mongo"
+		          def networkName = "schedule_network"
+		            
+		          docker.image('mongo').run(" --name ${containerName} --network ${networkName} -p 27017:27017")
+		        }
+		    },
+                    redis: {
+                	script {
+                            def containerName = "schedule_redis"
+                            def networkName = "schedule_network"
+                            docker.image('redis:alpine').run("-d --name ${containerName} --network ${networkName} -p 6379:6379 ")
+                        }
+                    },
+                    postgres: {
+                	script {
+                            def containerName = "schedule_postgres"
+                            def networkName = "schedule_network"
+                    
+                            docker.image('postgres:alpine').run(" --name ${containerName} --network ${networkName} -e POSTGRES_USER=${db_cred_USR} -e POSTGRES_PASSWORD=${db_cred_PSW} -e POSTGRES_DB=schedule -p 5432:5432")
+                            sleep time: 10, unit: 'SECONDS'
+                            sh 'docker exec  schedule_postgres psql -U schedule -c "CREATE DATABASE schedule_test;"'
+                        }
+                   }
+                )
+            }
+        }
+        stage('Create war') {
+            steps{
+              script {
+		sh 'docker run  --name war-copier -v war_file:/data   --env-file ${envfile} --network schedule_network -v $(pwd):/app -w /app gradle:7.3.0-jdk11-alpine sh -c "gradle build && cp /app/build/libs/class_schedule.war  /data/class_schedule.war"'
+                    
+              }  
+            }
+        }
+        stage('Deploy to tomcat container') {
+	    steps {
+	      script {
+                 def networkName = "schedule_network"
+                 def containerName ="tomcat_run"
+                    
+                 docker.image('tomcat:9.0.82-jre11').run("--name ${containerName} --network ${networkName} --env-file ${envfile}  -d -p 8081:8080 -v war_file:/data")
+                 sh 'docker exec  tomcat_run cp /data/class_schedule.war /usr/local/tomcat/webapps/ROOT.war'
+              }
+	    }
+        }
+        stage('Upload image'){
+            steps {
+               script {
+                 sh 'chmod +x ./new_version.sh'
+                 sh 'docker login -u "${nexus_user_USR}" -p "${nexus_user_PSW}"  "${nexus_url}"'
+                 sh 'message=$(git log --pretty=format:%s -n 1)' 
+                 sh './new_version.sh "$repo_url"  "$image_name" "$message"'
+                   
+               }
+            }
+        }
+      
+    }
+     post {
+        always {
+            sh 'docker stop schedule_postgres  schedule_mongo  schedule_redis  tomcat_run'
+            sh 'docker container prune -f'
+            sh 'docker network prune -f'  
+        }
+        success {
+            discordSend description: "Jenkins Pipeline Build", footer: "BUILD SUCCESS", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "${discord_webhook}"
+           
+        }
+        failure {
+            discordSend description: "Jenkins Pipeline Build", footer: "BUILD FAILURE", link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: "${discord_webhook}"
+           
+        }
+    }
+}
