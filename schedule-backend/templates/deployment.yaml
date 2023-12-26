@@ -5,23 +5,66 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.name }}
-      tier: {{ .Release.Name }}
-      track: stable
+      service: {{ .Release.Name }}
+      app: {{ .Release.Name }}
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        app: {{ .Values.name }}
-        tier: {{ .Release.Name }}
-        track: stable
+        service: {{ .Release.Name }}
+        app: {{ .Release.Name }}
       annotations:
         consul.hashicorp.com/connect-inject: 'true'
     spec:
       containers:
-        - name: {{ .Values.name }}
+        - name: {{ .Release.Name }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           image: {{ .Values.image }}
           ports:
             - name: {{ .Release.Name }}-port
               containerPort: {{ .Values.deployment.containerPort }}
+          env:
+            - name: JWT_EXPIRED
+              value: "86400000"
+              
+            - name: JWT_SECRET
+              value: jwtsecret
+              
+            - name: DB_NAME
+              value: schedule
+              
+            - name: DB_USERNAME
+              value: schedule
+            
+            - name: DB_PASSWORD
+              value: pass
+              
+            - name: DB_HOST
+              value: "10.138.0.4"
+              
+            - name: DB_PORT
+              value: "5432"
+              
+            - name: MONGO_DATABASE
+              value: schedule_mongo
+              
+            - name: MONGO_SERVER
+              value: mongo.default.svc.cluster.local
+              
+            - name: REDIS_PORT
+              value: "6379"
+              
+            - name: REDIS_HOST
+              value: redis.default.svc.cluster.local
+              
+            - name: FACEBOOK_CLIENT_ID
+              value: "748342852383540"
+              
+            - name: FACEBOOK_CLIENT_SECRET
+              value: "7eacc027056ac2cacdf3ed456598f37e"
+              
+            - name: GOOGLE_CLIENT_ID
+              value: "593111454680-500ngi1n2a054g480rh8nh53j4b4lb3a.apps.googleusercontent.com"
+              
+            - name: GOOGLE_CLIENT_SECRET
+              value: "QUp7QSh8FmciiuA6hjT0EBzV"    
