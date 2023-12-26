@@ -1,0 +1,51 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+ name: gateway-frontend
+ namespace: default
+# Allow traffic from gateway-api to frontend
+spec:
+ destination:
+   name: frontend
+ sources:
+   - name: gateway
+     action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+ name: frontend-to-gateway
+ namespace: default
+# Allow traffic from frontend to gateway
+spec:
+ destination:
+   name: gateway
+ sources:
+   - name: frontend
+     action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+ name: frontend-to-backend
+ namespace: default
+# Allow traffic from frontend to backend
+spec:
+ destination:
+   name: backend
+ sources:
+   - name: frontend
+     action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+ name: backend-to-redis
+ namespace: default
+# Allow traffic from backend to redis-service
+spec:
+ destination:
+   name: redis-service
+ sources:
+   - name: backend
+     action: allow
