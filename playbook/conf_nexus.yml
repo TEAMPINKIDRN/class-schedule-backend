@@ -1,0 +1,16 @@
+- name: Change Nexus admin password
+  hosts: azure_vm
+  gather_facts: false
+  vars_files:
+    - variables/variables.yml
+  tasks:
+    - name: Transfer the script
+      copy: src=conf.sh dest=/home/azureuser mode=0777
+
+    - name: Execute the script
+      command: sh /home/azureuser/conf.sh  "{{ nexus_admin_pass }}"
+      
+    - name: Remove script
+      ansible.builtin.file:
+      path: /home/azureuser/conf.sh
+      state: absent
