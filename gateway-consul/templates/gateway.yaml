@@ -1,0 +1,13 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: api-gateway
+spec:
+  gatewayClassName: {{ .Values.gatewayClassName }}
+  listeners:
+  - protocol: {{ .Values.listen.protocol }}
+    port: {{ .Values.listen.port }}
+    name: {{ .Values.listen.protocol | lower }}
+    allowedRoutes:
+      namespaces:
+        from: All
