@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.postgres.name }}
+spec:
+  selector:
+    matchLabels:
+      service: {{ .Values.postgres.name }}
+      app: {{ .Values.postgres.name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.postgres.name }}
+        app: {{ .Values.postgres.name }}
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
+    spec:
+      containers:
+      - name: {{ .Values.postgres.name }}
+        image: postgres:latest
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: schedule
+        - name: POSTGRES_USER
+          value: schedule
+        volumeMounts:
+        - name: postgres-init-script
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: postgres-init-script
+        configMap:
+          name: postgres-init-script

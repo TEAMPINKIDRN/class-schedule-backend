@@ -1,0 +1,38 @@
+global:
+  image: "hashicorp/consul:1.16.0"
+  datacenter: dc2
+  peering:
+    enabled: true # mandatory for cluster peering
+  tls:
+    enabled: true # mandatory for cluster peering
+
+server:
+  replicas: 2
+  bootstrapExpect: 2
+  extraConfig: |
+    {
+      "log_level": "TRACE"
+    }
+
+connectInject:
+  enabled: true
+  
+apiGateway:
+  managedGatewayClass:
+    serviceType: LoadBalancer
+
+client:
+  enabled: true
+
+meshGateway:
+  enabled: true
+  replicas: 1
+
+controller:
+  enabled: true
+
+#ui:
+#  enabled: true
+#  service:
+#    enabled: true
+#    type: LoadBalancer

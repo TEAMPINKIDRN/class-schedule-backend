@@ -1,0 +1,40 @@
+replicaCount: 2
+image: bobrja/pink-team:1
+name : backend
+imagePullPolicy: Always
+
+
+deployment:
+  containerPort: 8080
+
+service:
+  name : backend
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  protocol: TCP
+  containerPort: 8080
+
+mongo:
+  type: ClusterIP
+  port: 27017
+  targetPort: 27017
+  protocol: TCP
+  name: mongo
+  replicas: 2
+
+redis:
+  type: ClusterIP
+  port: 6379
+  targetPort: 6379
+  protocol: TCP
+  name: redis
+  replicas: 2
+
+postgres:
+  type: ClusterIP
+  port: 5432
+  targetPort: 5432
+  protocol: TCP
+  name: postgres
+  replicas: 2
