@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.mongo.name }}
+spec:
+  selector:
+    matchLabels:
+      service: {{ .Values.mongo.name }}
+      app: {{ .Values.mongo.name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.mongo.name }}
+        app: {{ .Values.mongo.name }}
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
+    spec:
+      containers:
+        - name: {{ .Values.mongo.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: mongo
+          ports:
+            - name: {{ .Values.mongo.name }}-port
+              containerPort: 27017

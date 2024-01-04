@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.redis.name }}
+spec:
+  selector:
+    matchLabels:
+      service: {{ .Values.redis.name }}
+      app: {{ .Values.redis.name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.redis.name }}
+        app: {{ .Values.redis.name }}
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
+    spec:
+      containers:
+        - name: {{ .Values.redis.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: redis:alpine
+          ports:
+            - name: {{ .Values.redis.name }}-port
+              containerPort: 6379

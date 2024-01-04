@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.service.name }}
+spec:
+  selector:
+    matchLabels:
+      service: {{ .Values.service.name }}
+      app: {{ .Values.service.name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Values.service.name }}
+        app: {{ .Values.service.name }}
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
+    spec:
+      containers:
+        - name: {{ .Values.service.name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: {{ .Values.image }}
+          ports:
+            - name: {{ .Values.service.name }}-port
+              containerPort: {{ .Values.deployment.containerPort }}
+          env:              
+            - name: DB_NAME
+              value: schedule
+              
+            - name: DB_USERNAME
+              value: schedule
+   
