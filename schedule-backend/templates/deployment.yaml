@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      service: {{ .Release.Name }}
+      app: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Release.Name }}
+        app: {{ .Release.Name }}
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          image: {{ .Values.image }}
+          ports:
+            - name: {{ .Release.Name }}-port
+              containerPort: {{ .Values.deployment.containerPort }}
+          env:
+            - name: JWT_EXPIRED
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: jwt-expired
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: jwt-token
+
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: postgres-db
+
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: postgres-port
+
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: postgres-ip
+
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: postgres-admin
+              
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: postgres-password
+
+            - name: MONGO_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: mongo-db
+
+            - name: MONGO_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: mongo-url
+
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: redis-port
+
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: redis-ip
+
+            - name: FACEBOOK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: facebook-cl
+
+            - name: FACEBOOK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: facebook-cl-scr
+
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: google-cl-id
+
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets-from-sm
+                  key: google-cl-scr
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      app: schedule
+      tier: redis
+      track: stable
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: schedule
+        tier: redis
+        track: stable
+    spec:
+      containers:
+        - name: redis
+          image: redis:alpine
+          ports:
+            - name: redis
+              containerPort: 6379
+
