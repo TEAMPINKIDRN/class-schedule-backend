@@ -7,8 +7,8 @@ The main goal of the project is designing a website where the university or inst
 ## Quick start ⚡
 - [About Project Architecture](#architecture-section)
 - [For Developers](#instructions-for-developers-how-to-run-project-locally)
-- [Run in Stage](#instructions-how-to-deploy-project-in-stage)
-- [Run in Production](#instructions-how-to-deploy-project-in-production)
+- [Stage](#stage)
+- [Production](#production)
 - [Partners](#partners-)
 
 ## DEV environment configuration
@@ -17,7 +17,7 @@ In order to create a local copy of the project you need:
 2. Open a terminal and go to the directory where you want to clone the files. 
 3. Run the following command. Git automatically creates a folder with the repository name and downloads the files there.
 ```
-git clone https://github.com/MaksymukNatalia/Schedule.git
+git clone https://github.com/TEAMPINKIDRN/class-schedule-backend.git
 ```
 4. Enter your username and password if GitHub requests.
 
@@ -149,6 +149,47 @@ To deploy the application, follow these steps:
 - `POSTGRES_USER`: The owner the database.
 - `POSTGRES_DB`: Your current database.
 - `POSTGRES_PASSWORD`: Your password for `POSTGRES_USER` .
+
+## Stage
+
+
+
+## Production
+First go to the directory of terragrunt from the directory of project
+```
+cd terragrunt-git/infrastructure-live-v3/prod/
+```
+Then run terragrunt command
+```
+terragrunt apply
+```
+Now you have a cluster on GCP.
+
+Install helm from https://helm.sh/ on GCP clusters
+At first install consul from helm charts following the documentation of hashicorp https://developer.hashicorp.com/consul/tutorials/get-started-kubernetes/kubernetes-gs-deploy
+Use values file from our git, named /consul/values-1.yaml, so the command will look like this:
+```
+helm install --values values-1.yaml consul hashicorp/consul --create-namespace --namespace consul --version "1.2.0"
+```
+Then install backend service using helm. Go to the directory schedule-backend and use the command:
+```
+helm install backend ."
+```
+
+After that use git clone https://github.com/TEAMPINKIDRN/class-schedule-frontend.git
+```
+git clone https://github.com/TEAMPINKIDRN/class-schedule-frontend.git
+```
+Install frontend service. Go to the directory schedule-frontend and use the command:
+```
+helm install frontend ."
+```
+
+Now we can install gateway for external traffic could reach our cluster service. Go to the class-schedule-backend/gateway-consul and use command:
+```
+helm install gateway ."
+```
+Follow the external IP and see web application
 
 
 ### Troubleshooting
